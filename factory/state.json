@@ -1,1 +1,12 @@
-{"rotation": 0, "published": []}
+{
+ "rotation": 1,
+ "published": [
+  {
+   "lesson": "abc_phonics_1",
+   "videoId": "4Q9OdB3ZATA",
+   "publishAt": "2026-10-20T12:30:00Z",
+   "local_slot": "2026-10-20 18:30",
+   "date": "20261020"
+  }
+ ]
+}

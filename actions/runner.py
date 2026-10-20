@@ -83,7 +83,7 @@ def commit(path, msg):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", default="produce", choices=["produce", "selftest", "status"])
-    ap.add_argument("--lesson", default=None, help="force a lesson id")
+    ap.add_argument("--rhymes", default=None, help="single rhyme id (demo mode)")
     args = ap.parse_args()
     st = load_state()
 
@@ -93,36 +93,40 @@ def main():
         log(f"published: {len(st.get('published', []))} videos; rotation={st.get('rotation')}")
         return
 
-    if args.lesson:
-        lesson = next(l for l in LESSONS if l["id"] == args.lesson)
+    # --- Nunu-style nursery rhyme compilation (owner final 2026-10-20)
+    from kids import rhymes as RH
+    from kids import rhyme_render as RR
+    if args.rhymes:
+        comp = [next(r for r in RH.RHYMES if r["id"] == args.rhymes)] * 1
+        # demo single-rhyme mode
     else:
-        lesson = next_lesson(st)
+        comp = RH.day_rhymes()
+    comp_id = comp[0]["id"] + ("+" + "+".join(r["id"] for r in comp[1:]) if len(comp) > 1 else "")
 
     run_id = _dt.datetime.now(_dt.timezone(_dt.timedelta(hours=6))).strftime("%Y%m%d_%H%M")
-    workdir = os.path.join(RUNS, f"{run_id}_{lesson['id']}")
+    workdir = os.path.join(RUNS, f"{run_id}_{comp[0]['id']}")
     os.makedirs(workdir, exist_ok=True)
-    log(f"lesson: {lesson['id']} ({len(lesson['beats'])} beats)")
+    log(f"rhymes: {comp_id} ({sum(len(r['lines']) for r in comp)} lyric lines)")
 
-    from kids import render as R
-    mp4, total = R.render(lesson, workdir)
-    thumb = R.make_thumb(lesson, workdir)
+    mp4, total = RR.render(comp, workdir)
+    thumb = RR.make_thumb(comp, workdir)
 
     if args.mode == "selftest":
         log(f"selftest OK: {mp4} ({total:.1f}s) - no upload")
-        rep = {"mode": "selftest", "lesson": lesson["id"], "duration": round(total, 1),
+        rep = {"mode": "selftest", "rhymes": comp_id, "duration": round(total, 1),
                "file": os.path.basename(mp4), "ts": run_id}
         json.dump(rep, open(os.path.join(REPORTS, f"{run_id}_selftest.json"), "w"), indent=1)
         return
 
     pub_at, local = yt.next_slot()
-    vid = yt.upload(lesson, mp4, thumb, pub_at)
+    vid = yt.upload_rhymes(comp, mp4, thumb, pub_at)
     st.setdefault("published", []).append({
-        "lesson": lesson["id"], "videoId": vid, "publishAt": pub_at,
+        "lesson": comp_id, "videoId": vid, "publishAt": pub_at,
         "local_slot": local, "date": run_id[:8]})
-    st["rotation"] = (st.get("rotation", 0) + 1) % len(LESSONS)
+    st["rotation"] = st.get("rotation", 0) + 1
     save_state(st)
-    commit(STATE_F, f"publish {lesson['id']} -> {vid} @ {pub_at}")
-    rep = {"mode": "produce", "lesson": lesson["id"], "videoId": vid,
+    commit(STATE_F, f"publish {comp_id} -> {vid} @ {pub_at}")
+    rep = {"mode": "produce", "rhymes": comp_id, "videoId": vid,
            "publishAt": pub_at, "local_slot": local, "duration": round(total, 1)}
     json.dump(rep, open(os.path.join(REPORTS, f"{run_id}_publish.json"), "w"), indent=1)
     commit("actions/reports", f"report {run_id} {vid}")

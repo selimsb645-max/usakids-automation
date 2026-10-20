@@ -161,3 +161,23 @@ def upload(lesson, mp4, thumb, publish_at, playlist=None):
     except Exception as ex:
         log("thumb: warning " + str(ex)[:140])
     return vid
+
+
+def upload_rhymes(comp, mp4, thumb, publish_at):
+    """Upload a nursery-rhyme compilation (list of rhyme dicts from rhymes.py)."""
+    primary = comp[0]
+    titles = [r["title"] for r in comp]
+    lesson = {
+        "title": primary["title_full"][:99],
+        "desc": ("Sing along with " + ", ".join(titles) + "!\n\n"
+                 "USA Kids presents fun nursery rhymes and kids songs for babies, "
+                 "toddlers and preschoolers. Colorful animation, friendly voices and "
+                 "easy sing-along lyrics make learning letters, numbers, colors and "
+                 "good habits joyful. Perfect for playtime, bedtime and family fun!\n\n"
+                 "Chapters:\n" + "\n".join(f"0{i+1}. {t}" for i, t in enumerate(titles))),
+        "tags": [t.strip() for r in comp for t in r["keywords"].split(",")][:18],
+    }
+    # YouTube tags cap: keep total under 480 chars
+    while " ".join(lesson["tags"]) > 480:
+        lesson["tags"].pop()
+    return upload(lesson, mp4, thumb, publish_at)

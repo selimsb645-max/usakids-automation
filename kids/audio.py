@@ -128,3 +128,56 @@ def assemble(voice_wavs, starts, total_s, out_path):
     print(f"audio: mixed {len(voice_wavs)} lines + music -> {out_path} "
           f"({total_s:.1f}s, peak {np.abs(mix).max():.2f})", flush=True)
     return out_path
+
+
+NOTE_FREQS = {
+    "C3": 130.81, "D3": 146.83, "E3": 164.81, "F3": 174.61, "G3": 196.00,
+    "A3": 220.00, "B3": 246.94, "C4": 261.63, "D4": 293.66, "E4": 329.63,
+    "F4": 349.23, "G4": 392.00, "A4": 440.00, "B4": 493.88, "C5": 523.25,
+    "D5": 587.33, "E5": 659.25, "F5": 698.46, "G5": 783.99, "A5": 880.00,
+    "R": 0.0,
+}
+
+
+def melody_track(tune, total_s, bpm=116.0):
+    """Play a (note, eighths) tune as a bouncy marimba loop for total_s seconds,
+    with a soft bass root on each bar. Returns float32 track."""
+    eighth = 60.0 / bpm / 2.0
+    loop_beats = sum(e for _n, e in tune)
+    loop_s = loop_beats * eighth
+    out = np.zeros(int(total_s * SR) + SR, dtype=np.float32)
+    # bass root = first non-rest note, one octave down, every 4 eighths
+    root = next((NOTE_FREQS[n] / 2.0 for n, _e in tune if n != "R"), 130.81)
+    tb = 0.0
+    while tb < total_s:
+        s = int(tb * SR)
+        tone = _tone(root / 2.0, eighth * 3.5, amp=0.20, decay=5.0)
+        e = min(len(out), s + len(tone))
+        if e > s:
+            out[s:e] += tone[:e - s]
+        tb += eighth * 4
+    # melody loop
+    t_start = 0.0
+    while t_start < total_s:
+        tc = t_start
+        for name, eighths in tune:
+            dur = eighth * eighths
+            if name != "R":
+                f = NOTE_FREQS[name]
+                s = int(tc * SR)
+                tone = _tone(f, dur * 1.9, amp=0.16, decay=7.5)
+                e = min(len(out), s + len(tone))
+                if e > s:
+                    out[s:e] += tone[:e - s]
+                # little octave sparkle on long notes
+                if eighths >= 2:
+                    tone2 = _tone(f * 2, dur * 1.2, amp=0.06, decay=9.0)
+                    s2 = int((tc + eighth) * SR)
+                    e2 = min(len(out), s2 + len(tone2))
+                    if e2 > s2:
+                        out[s2:e2] += tone2[:e2 - s2]
+            tc += dur
+        t_start += loop_s
+    out = out[:int(total_s * SR)]
+    out /= max(1.0, np.abs(out).max() / 0.9)
+    return out * 0.30

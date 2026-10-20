@@ -13,7 +13,7 @@ TOKEN_F = os.environ.get("YT_TOKEN_FILE",
                          os.path.join(os.path.dirname(BASE), "yt-auth", "token_usakids.json"))
 TZ = _dt.timezone(_dt.timedelta(hours=6))          # Asia/Dhaka
 SLOT_LOCAL_H, SLOT_LOCAL_M = 18, 30                # public slot 18:30 BD daily
-LEAD_MIN = 8 * 60                                  # min lead production -> publish
+LEAD_MIN = 3 * 60                                  # min lead production -> publish
 
 
 def log(m):

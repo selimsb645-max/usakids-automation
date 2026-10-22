@@ -264,20 +264,9 @@ def starts_of(plan, rhyme):
     return [0.0]
 
 
-def make_thumb(comp, workdir):
-    """Cocomelon-style thumbnail: cute character reaching up to big letter
-    balloons over a sunny sky, huge hook word + brand tag. High-saturation,
-    phone-readable, no watermark issues (all self-drawn)."""
+def _draw_sky_decor(d):
     import math as _m
-    r = comp[0]
-    img = Image.new("RGB", (SMALL_W, SMALL_H))
-    d = ImageDraw.Draw(img)
-    # sky gradient (bright day)
-    for y in range(SMALL_H):
-        t = y / SMALL_H
-        d.line([(0, y), (SMALL_W, y)],
-               fill=(int(120 + 100 * t), int(200 - 40 * t), 255))
-    # sun with rays, top-right
+    # sky gradient (bright day)ight
     sx, sy, sr = SMALL_W * 0.86, SMALL_H * 0.14, 58
     for a in range(12):
         ang = a * _m.pi / 6
@@ -292,6 +281,26 @@ def make_thumb(comp, workdir):
     d.ellipse([-160, SMALL_H - gh - 40, 520, SMALL_H - gh + 120], fill=(150, 220, 105))
     cloud(d, SMALL_W * 0.24, SMALL_H * 0.16, 70)
     cloud(d, SMALL_W * 0.66, SMALL_H * 0.24, 55)
+
+
+def make_thumb(comp, workdir):
+    """Cocomelon-style thumbnail: cute character reaching up to big letter
+    balloons over a sunny sky, huge hook word + brand tag. High-saturation,
+    phone-readable, no watermark issues (all self-drawn)."""
+    import math as _m
+    r = comp[0]
+    # AI-generated Cocomelon-style hero art (committed to repo by the art pack
+    # tool); fall back to self-drawn scene if missing.
+    hero = None
+    art = os.path.join(os.path.dirname(__file__), "..", "factory", "thumb_art", r["id"] + ".jpg")
+    if os.path.exists(art):
+        hero = Image.open(art).convert("RGB").resize((SMALL_W, SMALL_H), Image.LANCZOS)
+        img = hero
+    else:
+        img = Image.new("RGB", (SMALL_W, SMALL_H))
+    d = ImageDraw.Draw(img)
+    if hero is None:
+        _draw_sky_decor(d)
     # --- letter balloons (the Cocomelon signature) ---
     letters = list(r.get("thumb_letters", ["A", "B", "C"]))
     bal_c = [(250, 80, 90), (255, 205, 60), (95, 160, 255), (250, 130, 190)]

@@ -13,7 +13,7 @@ TOKEN_F = os.environ.get("YT_TOKEN_FILE",
                          os.path.join(os.path.dirname(BASE), "yt-auth", "token_usakids.json"))
 TZ = _dt.timezone(_dt.timedelta(hours=6))          # Asia/Dhaka
 SLOT_LOCAL_H, SLOT_LOCAL_M = 18, 30                # public slot 18:30 BD daily
-LEAD_MIN = 3 * 60                                  # min lead production -> publish
+LEAD_MIN = 30 * 60                                 # 30 min real lead production -> publish
 
 
 def log(m):
@@ -168,7 +168,8 @@ def upload_rhymes(comp, mp4, thumb, publish_at):
     primary = comp[0]
     titles = [r["title"] for r in comp]
     lesson = {
-        "title": primary["title_full"][:99],
+        "title": (primary["title"] + " + More Nursery Rhymes & Kids Songs"
+                  + " | USA Kids")[:99],
         "desc": ("Sing along with " + ", ".join(titles) + "!\n\n"
                  "USA Kids presents fun nursery rhymes and kids songs for babies, "
                  "toddlers and preschoolers. Colorful animation, friendly voices and "

@@ -265,25 +265,77 @@ def starts_of(plan, rhyme):
 
 
 def make_thumb(comp, workdir):
-    """Nunu-style bright thumbnail: rhyme-1 key scene + huge words."""
+    """Cocomelon-style thumbnail: cute character reaching up to big letter
+    balloons over a sunny sky, huge hook word + brand tag. High-saturation,
+    phone-readable, no watermark issues (all self-drawn)."""
+    import math as _m
     r = comp[0]
-    img = rhyme_scenes.draw_scene(r["id"], r["lines"][0][0], 0.8, 4.0)
+    img = Image.new("RGB", (SMALL_W, SMALL_H))
     d = ImageDraw.Draw(img)
+    # sky gradient (bright day)
+    for y in range(SMALL_H):
+        t = y / SMALL_H
+        d.line([(0, y), (SMALL_W, y)],
+               fill=(int(120 + 100 * t), int(200 - 40 * t), 255))
+    # sun with rays, top-right
+    sx, sy, sr = SMALL_W * 0.86, SMALL_H * 0.14, 58
+    for a in range(12):
+        ang = a * _m.pi / 6
+        d.line([sx + _m.cos(ang) * sr, sy + _m.sin(ang) * sr,
+                sx + _m.cos(ang) * (sr + 26), sy + _m.sin(ang) * (sr + 26)],
+               fill=(255, 230, 90), width=10)
+    d.ellipse([sx - sr, sy - sr, sx + sr, sy + sr], fill=(255, 220, 60))
+    # grass ground
+    gh = 200
+    d.rounded_rectangle([-40, SMALL_H - gh + 20, SMALL_W + 40, SMALL_H + 60],
+                        radius=140, fill=(120, 205, 90))
+    d.ellipse([-160, SMALL_H - gh - 40, 520, SMALL_H - gh + 120], fill=(150, 220, 105))
+    cloud(d, SMALL_W * 0.24, SMALL_H * 0.16, 70)
+    cloud(d, SMALL_W * 0.66, SMALL_H * 0.24, 55)
+    # --- letter balloons (the Cocomelon signature) ---
+    letters = list(r.get("thumb_letters", ["A", "B", "C"]))
+    bal_c = [(250, 80, 90), (255, 205, 60), (95, 160, 255), (250, 130, 190)]
+    bx = [SMALL_W * 0.30, SMALL_W * 0.48, SMALL_W * 0.66, SMALL_W * 0.80]
+    by = [SMALL_H * 0.30, SMALL_H * 0.44, SMALL_H * 0.32, SMALL_H * 0.47]
+    bs = 86
+    for i, ch in enumerate(letters[:4]):
+        x, y, c = bx[i], by[i], bal_c[i]
+        # string from balloon to the baby's raised hand
+        hx, hy = SMALL_W * 0.30, SMALL_H * 0.80
+        d.line([x, y + bs * 1.02, (x + hx) / 2, (y + hy) / 2 - 30, hx, hy],
+               fill=(250, 250, 250), width=5, joint="curve")
+        d.ellipse([x - bs, y - bs * 1.08, x + bs, y + bs * 1.02], fill=c,
+                  outline=_shade(c, 0.6), width=6)
+        d.ellipse([x - bs * 0.45, y - bs * 0.62, x - bs * 0.12, y - bs * 0.30],
+                  fill=_shade(c, 1.25))          # shine
+        f = _font(96)
+        d.text((x - d.textlength(ch, font=f) / 2, y - 62), ch, font=f,
+               fill=(255, 255, 255), stroke_width=8, stroke_fill=(60, 50, 100))
+    # --- cute baby reaching up (arms raised at t=0.1) ---
+    baby(d, SMALL_W * 0.30, SMALL_H * 0.78, 118, t=0.1, onesie=(90, 170, 255))
+    # --- big hook word pill, top-left ---
     words = r.get("thumb_words", ["USA", "KIDS"])
-    # big top-left pill word 1
-    f1 = _font(150)
+    f1 = _font(132)
     tw = d.textlength(words[0], font=f1)
-    d.rounded_rectangle([28, 24, 28 + tw + 70, 216], radius=36, fill=(255, 210, 60))
-    d.text((64, 44), words[0], font=f1, fill=(255, 255, 255),
-           stroke_width=14, stroke_fill=(200, 70, 40))
+    d.rounded_rectangle([26, 22, 26 + tw + 64, 200], radius=34, fill=(255, 210, 60),
+                        outline=(200, 140, 30), width=8)
+    d.text((58, 44), words[0], font=f1, fill=(255, 255, 255),
+           stroke_width=12, stroke_fill=(200, 70, 40))
     # second word bottom banner
-    f2 = _font(120)
+    f2 = _font(104)
     w2 = words[1] if len(words) > 1 else "KIDS!"
     tw2 = d.textlength(w2, font=f2)
-    d.rounded_rectangle([SMALL_W - tw2 - 150, SMALL_H - 170, SMALL_W - 28, SMALL_H - 44],
-                        radius=32, fill=(255, 120, 140))
-    d.text((SMALL_W - tw2 - 118, SMALL_H - 156), w2, font=f2, fill=(255, 255, 255),
-           stroke_width=12, stroke_fill=(140, 30, 40))
+    d.rounded_rectangle([SMALL_W - tw2 - 140, SMALL_H - 156, SMALL_W - 26, SMALL_H - 40],
+                        radius=28, fill=(255, 120, 140), outline=(170, 40, 60), width=8)
+    d.text((SMALL_W - tw2 - 106, SMALL_H - 140), w2, font=f2, fill=(255, 255, 255),
+           stroke_width=10, stroke_fill=(140, 30, 40))
+    # brand tag bottom-left (like the logo corner on big kids channels)
+    fb = _font(46)
+    bt = "USA KIDS"
+    bw = d.textlength(bt, font=fb)
+    d.rounded_rectangle([26, SMALL_H - 88, 26 + bw + 40, SMALL_H - 26], radius=22,
+                        fill=(255, 255, 255), outline=(60, 60, 120), width=5)
+    d.text((46, SMALL_H - 78), bt, font=fb, fill=(90, 70, 160))
     thumb = os.path.join(workdir, "thumb.jpg")
     img.save(thumb, quality=92)
     print(f"thumb: {thumb}", flush=True)

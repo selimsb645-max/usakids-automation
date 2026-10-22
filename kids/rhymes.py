@@ -40,6 +40,7 @@ RHYMES = [
         "title": "Wheels on the Bus",
         "title_full": "Wheels on the Bus | Nursery Rhymes & Kids Songs",
         "thumb_words": ["WHEELS", "ON THE BUS"],
+        "thumb_letters": ["B", "U", "S"],
         "tune": WHEELS_TUNE,
         "keywords": ("wheels on the bus, nursery rhymes, kids songs, baby songs, "
                      "wheels on the bus for kids, bus song, children songs, toddler songs"),
@@ -59,6 +60,7 @@ RHYMES = [
         "title": "Twinkle Twinkle Little Star",
         "title_full": "Twinkle Twinkle Little Star | Lullaby for Kids",
         "thumb_words": ["TWINKLE", "LITTLE STAR"],
+        "thumb_letters": ["S", "T", "A"],
         "tune": TWINKLE_TUNE,
         "keywords": ("twinkle twinkle little star, nursery rhymes, lullaby, kids songs, "
                      "baby lullaby, star song, children songs, bedtime music"),
@@ -76,6 +78,7 @@ RHYMES = [
         "title": "ABC Song",
         "title_full": "ABC Song | Learn the Alphabet for Toddlers",
         "thumb_words": ["ABC", "SONG!"],
+        "thumb_letters": ["A", "B", "C"],
         "tune": TWINKLE_TUNE,
         "keywords": ("abc song, alphabet song, learn abc, abc for kids, nursery rhymes, "
                      "phonics song, alphabet for toddlers, kids learning songs"),
@@ -93,6 +96,7 @@ RHYMES = [
         "title": "Five Little Monkeys",
         "title_full": "Five Little Monkeys Jumping on the Bed | Fun Kids Song",
         "thumb_words": ["5 MONKEYS", "JUMPING!"],
+        "thumb_letters": ["1", "2", "3"],
         "tune": MONKEYS_TUNE,
         "keywords": ("five little monkeys, monkeys jumping on the bed, nursery rhymes, "
                      "kids songs, counting song, baby songs, funny kids songs"),
@@ -112,6 +116,7 @@ RHYMES = [
         "title": "Five Little Ducks",
         "title_full": "Five Little Ducks Went Out One Day | Counting Song for Kids",
         "thumb_words": ["5 DUCKS", "COUNT!"],
+        "thumb_letters": ["1", "2", "3"],
         "tune": DUCKS_TUNE,
         "keywords": ("five little ducks, duck song, nursery rhymes, counting song, "
                      "kids songs, baby songs, animal songs for children"),
@@ -127,6 +132,7 @@ RHYMES = [
         "title": "Finger Family",
         "title_full": "Finger Family Song | Daddy Finger Nursery Rhyme",
         "thumb_words": ["FINGER", "FAMILY"],
+        "thumb_letters": ["F", "A", "M"],
         "tune": FINGER_TUNE,
         "keywords": ("finger family, daddy finger, finger family song, nursery rhymes, "
                      "kids songs, baby songs, family song for children"),
@@ -144,6 +150,7 @@ RHYMES = [
         "title": "London Bridge Is Falling Down",
         "title_full": "London Bridge Is Falling Down | Classic Nursery Rhyme",
         "thumb_words": ["LONDON", "BRIDGE"],
+        "thumb_letters": ["L", "O", "N"],
         "tune": LONDON_TUNE,
         "keywords": ("london bridge is falling down, london bridge, nursery rhymes, "
                      "classic kids songs, baby songs, children songs, sing along"),
@@ -159,6 +166,7 @@ RHYMES = [
         "title": "Rain Rain Go Away",
         "title_full": "Rain Rain Go Away | Kids Song about Weather",
         "thumb_words": ["RAIN RAIN", "GO AWAY"],
+        "thumb_letters": ["R", "A", "I"],
         "tune": RAIN_TUNE,
         "keywords": ("rain rain go away, kids songs, weather song, nursery rhymes, "
                      "baby songs, children songs, toddler learning"),
@@ -174,6 +182,7 @@ RHYMES = [
         "title": "Head, Shoulders, Knees and Toes",
         "title_full": "Head Shoulders Knees and Toes | Exercise Song for Kids",
         "thumb_words": ["HEAD &", "SHOULDERS!"],
+        "thumb_letters": ["H", "E", "A"],
         "tune": SHOULDERS_TUNE,
         "keywords": ("head shoulders knees and toes, exercise song for kids, "
                      "body parts song, nursery rhymes, kids songs, toddler dance"),
@@ -187,11 +196,13 @@ RHYMES = [
 ]
 
 
-def day_rhymes(day=None):
-    """Pick the 3-rhyme compilation of the day (rotating, never repeating
-    the same combination two days in a row)."""
+def day_rhymes(day=None, window=8):
+    """Cocomelon-style long compilation: `window` rhymes in a rotating order
+    (different lead song + different set each day, never the same combo twice
+    in a row). 8 rhymes ~= 3:40 of sing-along content."""
     if day is None:
         day = _dt.date.today().toordinal()
     n = len(RHYMES)
-    start = (day * 3) % n
-    return [RHYMES[(start + i) % n] for i in range(3)]
+    window = min(window, n)
+    start = (day * 2) % n
+    return [RHYMES[(start + i) % n] for i in range(window)]

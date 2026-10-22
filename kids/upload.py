@@ -178,6 +178,6 @@ def upload_rhymes(comp, mp4, thumb, publish_at):
         "tags": [t.strip() for r in comp for t in r["keywords"].split(",")][:18],
     }
     # YouTube tags cap: keep total under 480 chars
-    while " ".join(lesson["tags"]) > 480:
+    while len(" ".join(lesson["tags"])) > 480:
         lesson["tags"].pop()
     return upload(lesson, mp4, thumb, publish_at)

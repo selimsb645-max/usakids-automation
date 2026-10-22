@@ -1,5 +1,5 @@
 {
- "rotation": 1,
+ "rotation": 2,
  "published": [
   {
    "lesson": "abc_phonics_1",
@@ -7,6 +7,13 @@
    "publishAt": "2026-10-20T12:30:00Z",
    "local_slot": "2026-10-20 18:30",
    "date": "20261020"
+  },
+  {
+   "lesson": "wheels_bus+twinkle+abc_song",
+   "videoId": "0Xd3e8ctIYA",
+   "publishAt": "2026-10-22T12:30:00Z",
+   "local_slot": "2026-10-22 18:30",
+   "date": "20261022"
   }
  ]
 }

@@ -1,5 +1,5 @@
 {
- "rotation": 3,
+ "rotation": 4,
  "published": [
   {
    "lesson": "abc_phonics_1",
@@ -21,6 +21,13 @@
    "publishAt": "2026-10-23T12:30:00Z",
    "local_slot": "2026-10-23 18:30",
    "date": "20261022"
+  },
+  {
+   "lesson": "twinkle+abc_song+five_monkeys+five_ducks+finger_family+london_bridge+rain_rain+head_shoulders",
+   "videoId": "_sVQmjrqnA0",
+   "publishAt": "2026-10-24T12:30:00Z",
+   "local_slot": "2026-10-24 18:30",
+   "date": "20261024"
   }
  ]
 }
